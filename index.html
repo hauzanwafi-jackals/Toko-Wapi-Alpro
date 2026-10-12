@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ruang Belanja</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #f6f5f0;
+      color: #20251f;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e1;
+      padding: 18px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand { font-size: 22px; font-weight: 700; color: #276749; }
+    .cart {
+      background: #276749;
+      color: #fff;
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 16px;
+      font-size: 15px;
+    }
+    main { width: min(1080px, 90%); margin: 48px auto; }
+    .intro { margin-bottom: 30px; }
+    .intro h1 { font-size: clamp(28px, 5vw, 40px); margin-bottom: 9px; }
+    .intro p { color: #69716a; line-height: 1.6; }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e8e8e1;
+      border-radius: 15px;
+      padding: 18px;
+      box-shadow: 0 5px 18px rgba(30, 40, 30, .04);
+    }
+    .product-icon {
+      height: 145px;
+      display: grid;
+      place-items: center;
+      background: #eef5ed;
+      border-radius: 11px;
+      font-size: 64px;
+      margin-bottom: 17px;
+    }
+    .category { color: #758078; font-size: 13px; margin-bottom: 7px; }
+    .card h2 { font-size: 19px; margin-bottom: 12px; }
+    .card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .price { font-weight: 700; color: #276749; }
+    .add-button {
+      border: 0;
+      border-radius: 8px;
+      padding: 9px 12px;
+      background: #e5f2e7;
+      color: #205a3b;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .add-button:hover { background: #d4ead8; }
+    .summary {
+      margin-top: 28px;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #e8e8e1;
+      border-radius: 13px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .summary span { color: #276749; font-weight: 700; }
+    @media (max-width: 520px) {
+      header { padding: 15px 5%; }
+      main { margin: 32px auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Ruang Belanja</div>
+    <button class="cart" type="button" aria-live="polite">
+      Keranjang: <span id="cart-count">0</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h1>Temukan barang favoritmu</h1>
+      <p>Pilihan sederhana untuk menemani aktivitas sehari-hari.</p>
+    </section>
+
+    <section class="products" aria-label="Daftar produk" id="product-list"></section>
+
+    <section class="summary" aria-live="polite">
+      <div>Jumlah barang: <span id="item-count">0</span></div>
+      <div>Total belanja: <span id="total-price">Rp0</span></div>
+    </section>
+  </main>
+
+  <script>
+    const products = [
+      { name: 'Kopi Nusantara', category: 'Minuman', price: 45000, icon: '☕' },
+      { name: 'Tas Kanvas', category: 'Aksesori', price: 85000, icon: '👜' },
+      { name: 'Tanaman Mini', category: 'Dekorasi', price: 35000, icon: '🪴' },
+      { name: 'Buku Catatan', category: 'Alat tulis', price: 28000, icon: '📓' }
+    ];
+
+    let itemCount = 0;
+    let totalPrice = 0;
+
+    const formatRupiah = (amount) => 'Rp' + amount.toLocaleString('id-ID');
+
+    const productList = document.getElementById('product-list');
+
+    products.forEach((product) => {
+      const article = document.createElement('article');
+      article.className = 'card';
+      article.innerHTML = `
+        <div class="product-icon" aria-hidden="true">${product.icon}</div>
+        <p class="category">${product.category}</p>
+        <h2>${product.name}</h2>
+        <div class="card-bottom">
+          <span class="price">${formatRupiah(product.price)}</span>
+          <button class="add-button" type="button" data-name="${product.name}" data-price="${product.price}">Tambah</button>
+        </div>
+      `;
+      productList.appendChild(article);
+    });
+
+    document.querySelectorAll('.add-button').forEach((button) => {
+      button.addEventListener('click', () => {
+        itemCount += 1;
+        totalPrice += Number(button.dataset.price);
+
+        document.getElementById('cart-count').textContent = itemCount;
+        document.getElementById('item-count').textContent = itemCount;
+        document.getElementById('total-price').textContent = formatRupiah(totalPrice);
+      });
+    });
+  </script>
+</body>
+</html>
