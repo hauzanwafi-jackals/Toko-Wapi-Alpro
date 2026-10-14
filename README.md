@@ -22,7 +22,7 @@ Keranjang, favorit, dan riwayat tersimpan di browser masing-masing. Checkout tid
 ```text
 .
 |-- index.html          # Versi statis untuk GitHub Pages
-|-- toko wapi alpro.py  # Aplikasi Flask
+|-- app.py              # Aplikasi Flask
 |-- requirements.txt    # Dependency aplikasi Python
 |-- .gitignore
 `-- README.md
@@ -61,7 +61,7 @@ Pasang dependency dan jalankan aplikasi:
 
 ```bash
 python -m pip install -r requirements.txt
-python "toko wapi alpro.py"
+python app.py
 ```
 
 Buka http://localhost:5001/.
