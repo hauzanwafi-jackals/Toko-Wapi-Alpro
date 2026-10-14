@@ -23,7 +23,11 @@
     .catalog-tools input:focus, .catalog-tools select:focus, input:focus, textarea:focus { outline: 2px solid #8cb99a; outline-offset: 1px; }
     .results-line { display: flex; justify-content: space-between; color: var(--muted); font: 13px 'Trebuchet MS', sans-serif; margin: 16px 0; }
     .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-    .card { min-width: 0; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
+    .card { position: relative; min-width: 0; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 14px; }
+    .favorite-button { position: absolute; top: 21px; right: 21px; width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: #9a533f; font: 24px/1 'Trebuchet MS', sans-serif; }
+    .favorite-button[aria-pressed="true"] { border-color: #9a533f; background: #fff2ed; }
+    .favorite-filter { display: flex; align-items: center; gap: 8px; color: var(--ink); font: 13px 'Trebuchet MS', sans-serif; white-space: nowrap; }
+    .favorite-filter input { width: 17px; height: 17px; accent-color: var(--green); }
     .product-icon { height: 150px; display: grid; place-items: center; background: #eaf1e8; border-radius: 4px; font-size: 62px; margin-bottom: 15px; }
     .category { color: #758078; font: 13px 'Trebuchet MS', sans-serif; margin-bottom: 6px; }
     .card h2 { font-size: 19px; margin-bottom: 7px; }
@@ -57,7 +61,7 @@
     .checkout-form textarea { min-height: 88px; resize: vertical; }
     .checkout-note, .checkout-result { color: var(--muted); font: 13px/1.5 'Trebuchet MS', sans-serif; }
     .checkout-result { padding-top: 18px; }
-    @media (max-width: 620px) { header { padding: 13px 5%; } main { margin: 32px auto 54px; } .catalog-tools { grid-template-columns: 1fr 1fr; } .catalog-tools input { grid-column: 1 / -1; } .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; } .card { padding: 10px; } .product-icon { height: 118px; font-size: 50px; } .card h2 { font-size: 16px; } .description { min-height: 54px; font-size: 12px; } .card-bottom { align-items: flex-start; flex-direction: column; } .add-button { width: 100%; } }
+    @media (max-width: 620px) { header { padding: 13px 5%; } main { margin: 32px auto 54px; } .catalog-tools { grid-template-columns: 1fr 1fr; } .catalog-tools input { grid-column: 1 / -1; } .favorite-filter { grid-column: 1 / -1; } .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; } .card { padding: 10px; } .favorite-button { top: 16px; right: 16px; width: 34px; height: 34px; } .product-icon { height: 118px; font-size: 50px; } .card h2 { font-size: 16px; } .description { min-height: 54px; font-size: 12px; } .card-bottom { align-items: flex-start; flex-direction: column; } .add-button { width: 100%; } }
     @media (max-width: 360px) { .products { grid-template-columns: 1fr; } .catalog-tools { grid-template-columns: 1fr; } .catalog-tools input { grid-column: auto; } }
   </style>
 </head>
@@ -85,6 +89,7 @@
         <option value="price-desc">Harga tertinggi</option>
         <option value="name">Nama A–Z</option>
       </select>
+      <label class="favorite-filter"><input id="favorites-only" type="checkbox"> Favorit saja</label>
     </section>
     <div class="results-line"><span id="result-count" aria-live="polite"></span><span>Harga dalam Rupiah</span></div>
     <section class="products" aria-label="Daftar produk" id="product-list"></section>
@@ -133,10 +138,13 @@
     const formatRupiah = (amount) => 'Rp' + amount.toLocaleString('id-ID');
     const productList = document.getElementById('product-list');
     const categoryFilter = document.getElementById('category-filter');
+    const favoritesOnly = document.getElementById('favorites-only');
     const cartDialog = document.getElementById('cart-dialog');
     const checkoutDialog = document.getElementById('checkout-dialog');
     const storageKey = 'ruang-belanja-cart-v2';
+    const favoritesStorageKey = 'ruang-belanja-favorites-v1';
     let cart = {};
+    let favorites = new Set();
 
     try {
       const savedCart = JSON.parse(localStorage.getItem(storageKey) || '{}');
@@ -147,6 +155,15 @@
       }
     } catch {
       cart = {};
+    }
+
+    try {
+      const savedFavorites = JSON.parse(localStorage.getItem(favoritesStorageKey) || '[]');
+      if (Array.isArray(savedFavorites)) {
+        favorites = new Set(savedFavorites.filter((id) => products.some((product) => product.id === id)));
+      }
+    } catch {
+      favorites = new Set();
     }
 
     [...new Set(products.map((product) => product.category))].sort().forEach((category) => {
@@ -177,6 +194,7 @@
       const sort = document.getElementById('sort-select').value;
       let visibleProducts = products.filter((product) =>
         (category === 'all' || product.category === category) &&
+        (!favoritesOnly.checked || favorites.has(product.id)) &&
         `${product.name} ${product.category} ${product.description}`.toLocaleLowerCase('id').includes(query)
       );
 
@@ -187,6 +205,7 @@
       document.getElementById('result-count').textContent = `${visibleProducts.length} produk ditemukan`;
       productList.innerHTML = visibleProducts.length ? visibleProducts.map((product) => `
         <article class="card">
+          <button class="favorite-button" type="button" data-favorite="${product.id}" aria-pressed="${favorites.has(product.id)}" aria-label="${favorites.has(product.id) ? 'Hapus dari' : 'Tambahkan ke'} favorit" title="${favorites.has(product.id) ? 'Hapus dari' : 'Tambahkan ke'} favorit">${favorites.has(product.id) ? '♥' : '♡'}</button>
           <div class="product-icon" aria-hidden="true">${product.icon}</div>
           <p class="category">${product.category}</p>
           <h2>${product.name}</h2>
@@ -233,7 +252,17 @@
     document.getElementById('search-input').addEventListener('input', renderProducts);
     categoryFilter.addEventListener('change', renderProducts);
     document.getElementById('sort-select').addEventListener('change', renderProducts);
+    favoritesOnly.addEventListener('change', renderProducts);
     productList.addEventListener('click', (event) => {
+      const favoriteButton = event.target.closest('[data-favorite]');
+      if (favoriteButton) {
+        const id = favoriteButton.dataset.favorite;
+        if (favorites.has(id)) favorites.delete(id);
+        else favorites.add(id);
+        localStorage.setItem(favoritesStorageKey, JSON.stringify([...favorites]));
+        renderProducts();
+        return;
+      }
       const button = event.target.closest('[data-add]');
       if (!button) return;
       cart[button.dataset.add] = (cart[button.dataset.add] || 0) + 1;
