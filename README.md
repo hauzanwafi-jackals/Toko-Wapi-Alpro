@@ -1,51 +1,74 @@
 # Ruang Belanja
 
-Website toko sederhana yang dibuat dengan HTML, CSS, dan JavaScript agar bisa dipublikasikan di GitHub Pages.
+Toko demo dengan dua pilihan menjalankan aplikasi: website statis untuk GitHub Pages dan aplikasi Flask untuk server Python.
 
-## Akses publik
+## Demo publik
 
-Buka toko di: https://hauzanwafi-jackals.github.io/Toko-Wapi-Alpro/
+[Buka Ruang Belanja](https://hauzanwafi-jackals.github.io/Toko-Wapi-Alpro/)
 
-Versi publik menggunakan `index.html`. File Flask tersedia sebagai versi server Python, tetapi tidak dijalankan oleh GitHub Pages.
+GitHub Pages menyajikan versi `index.html`. Flask tidak dijalankan oleh GitHub Pages.
 
 ## Fitur
 
-- Cari produk, filter kategori, dan urutkan katalog berdasarkan harga atau nama.
-- Simpan produk favorit dan tampilkan favorit saja; pilihan tersimpan di browser.
-- Kelola jumlah barang di keranjang; keranjang juga tersimpan di browser.
-- Simulasi checkout untuk melihat ringkasan pesanan demo.
-- Lihat konfirmasi dan riwayat pesanan demo yang tersimpan di browser.
+- Pencarian produk, filter kategori, dan pengurutan harga/nama.
+- Favorit produk yang disimpan di browser.
+- Keranjang dengan pengaturan jumlah dan total belanja.
+- Checkout demo dengan ringkasan serta riwayat pesanan.
 
-Checkout masih berupa simulasi. Riwayat tersimpan hanya di browser yang digunakan; pembayaran dan pengiriman belum terhubung.
+Keranjang, favorit, dan riwayat tersimpan di browser masing-masing. Checkout tidak memproses pembayaran atau pengiriman.
 
-## Cara menjalankan lokal
+## Struktur proyek
 
-### Versi statis
+```text
+.
+|-- index.html          # Versi statis untuk GitHub Pages
+|-- toko wapi alpro.py  # Aplikasi Flask
+|-- requirements.txt    # Dependency aplikasi Python
+|-- .gitignore
+`-- README.md
+```
 
-1. Buka folder project.
-2. Jalankan server lokal:
+## Menjalankan versi statis
 
 ```bash
 python -m http.server 8000
 ```
 
-3. Buka browser ke:
+Buka http://localhost:8000/.
 
-```text
-http://localhost:8000/
-```
+## Menjalankan versi Flask
 
-### Versi Flask
-
-Pasang Flask, lalu jalankan aplikasi Python:
+Gunakan Python 3.10 atau lebih baru, lalu jalankan:
 
 ```bash
-python -m pip install Flask
+python -m venv .venv
+```
+
+Aktifkan environment:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Di macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+
+Pasang dependency dan jalankan aplikasi:
+
+```bash
+python -m pip install -r requirements.txt
 python "toko wapi alpro.py"
 ```
 
-Buka `http://localhost:5001/` di browser. Keranjang, favorit, dan riwayat pesanan demo disimpan di browser yang digunakan.
+Buka http://localhost:5001/.
 
-## Catatan
+## Deployment
 
-GitHub Pages hanya bisa menampilkan website statis dari `index.html`. Aplikasi Flask membutuhkan server Python dan tidak bisa dijalankan langsung di GitHub Pages.
+- **GitHub Pages:** gunakan branch `main` dan folder root. File `index.html` harus tetap berada di root repository.
+- **Flask:** deploy ke layanan yang mendukung Python. Dependency terdaftar di `requirements.txt`; `gunicorn` tersedia untuk deployment Linux.
+
+GitHub Pages tidak dapat menjalankan aplikasi Flask karena tidak menyediakan server Python.
