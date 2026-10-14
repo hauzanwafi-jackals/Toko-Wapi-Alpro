@@ -14,6 +14,8 @@ Checkout masih berupa simulasi. Riwayat tersimpan hanya di browser yang digunaka
 
 ## Cara menjalankan lokal
 
+### Versi statis
+
 1. Buka folder project.
 2. Jalankan server lokal:
 
@@ -26,6 +28,17 @@ python -m http.server 8000
 ```text
 http://localhost:8000/
 ```
+
+### Versi Flask
+
+Pasang Flask, lalu jalankan aplikasi Python:
+
+```bash
+python -m pip install Flask
+python "toko wapi alpro.py"
+```
+
+Buka `http://localhost:5001/` di browser. Keranjang, favorit, dan riwayat pesanan demo disimpan di browser yang digunakan.
 
 ## Cara upload ke GitHub
 
@@ -45,4 +58,4 @@ https://username.github.io/nama-repository/
 
 ## Catatan
 
-GitHub Pages hanya bisa menampilkan website statis. Karena Flask adalah aplikasi Python server-side, ia tidak bisa langsung dipublish di GitHub Pages tanpa backend.
+GitHub Pages hanya bisa menampilkan website statis dari `index.html`. Aplikasi Flask membutuhkan server Python dan tidak bisa dijalankan langsung di GitHub Pages.
