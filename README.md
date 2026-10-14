@@ -2,6 +2,12 @@
 
 Website toko sederhana yang dibuat dengan HTML, CSS, dan JavaScript agar bisa dipublikasikan di GitHub Pages.
 
+## Akses publik
+
+Buka toko di: https://hauzanwafi-jackals.github.io/Toko-Wapi-Alpro/
+
+Versi publik menggunakan `index.html`. File Flask tersedia sebagai versi server Python, tetapi tidak dijalankan oleh GitHub Pages.
+
 ## Fitur
 
 - Cari produk, filter kategori, dan urutkan katalog berdasarkan harga atau nama.
@@ -39,22 +45,6 @@ python "toko wapi alpro.py"
 ```
 
 Buka `http://localhost:5001/` di browser. Keranjang, favorit, dan riwayat pesanan demo disimpan di browser yang digunakan.
-
-## Cara upload ke GitHub
-
-1. Buka GitHub dan buat repository baru.
-2. Upload file `index.html` ke repository.
-3. Masuk ke `Settings` → `Pages`.
-4. Pada bagian `Build and deployment`, pilih:
-   - Source: `Deploy from a branch`
-   - Branch: `main` atau `master`
-   - Folder: `/root`
-5. Klik `Save`.
-6. Tunggu beberapa saat, lalu GitHub akan memberi URL seperti:
-
-```text
-https://username.github.io/nama-repository/
-```
 
 ## Catatan
 
