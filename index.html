@@ -11,8 +11,10 @@
     button, input, select { font: inherit; }
     button { cursor: pointer; }
     header { position: sticky; top: 0; z-index: 2; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); padding: 15px max(5%, calc((100% - 1120px) / 2)); display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
     .brand { color: var(--green); font-family: 'Trebuchet MS', sans-serif; font-size: 21px; font-weight: 800; }
     .cart-trigger, .primary-button { border: 0; border-radius: 6px; padding: 11px 15px; background: var(--green); color: #fff; font-family: 'Trebuchet MS', sans-serif; font-weight: 700; }
+    .history-trigger { border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; background: #fff; color: var(--ink); font: 700 13px 'Trebuchet MS', sans-serif; }
     main { width: min(1120px, 90%); margin: 44px auto 70px; }
     .intro { margin-bottom: 28px; }
     .eyebrow { color: #9a533f; font: 700 12px 'Trebuchet MS', sans-serif; text-transform: uppercase; margin-bottom: 10px; }
@@ -61,16 +63,26 @@
     .checkout-form textarea { min-height: 88px; resize: vertical; }
     .checkout-note, .checkout-result { color: var(--muted); font: 13px/1.5 'Trebuchet MS', sans-serif; }
     .checkout-result { padding-top: 18px; }
-    @media (max-width: 620px) { header { padding: 13px 5%; } main { margin: 32px auto 54px; } .catalog-tools { grid-template-columns: 1fr 1fr; } .catalog-tools input { grid-column: 1 / -1; } .favorite-filter { grid-column: 1 / -1; } .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; } .card { padding: 10px; } .favorite-button { top: 16px; right: 16px; width: 34px; height: 34px; } .product-icon { height: 118px; font-size: 50px; } .card h2 { font-size: 16px; } .description { min-height: 54px; font-size: 12px; } .card-bottom { align-items: flex-start; flex-direction: column; } .add-button { width: 100%; } }
+    .result-items { display: grid; gap: 6px; margin-top: 10px; color: var(--ink); }
+    .result-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .order-list { display: grid; gap: 14px; max-height: 68vh; overflow: auto; padding-top: 18px; }
+    .order-record { border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+    .order-record-head, .order-record-total { display: flex; justify-content: space-between; gap: 12px; font: 700 14px 'Trebuchet MS', sans-serif; }
+    .order-record p, .order-record li { color: var(--muted); font: 13px/1.5 'Trebuchet MS', sans-serif; }
+    .order-record ul { margin: 8px 0 8px 18px; }
+    @media (max-width: 620px) { header { padding: 13px 5%; } .header-actions { gap: 6px; } .cart-trigger, .history-trigger { padding: 9px 10px; font-size: 12px; } main { margin: 32px auto 54px; } .catalog-tools { grid-template-columns: 1fr 1fr; } .catalog-tools input { grid-column: 1 / -1; } .favorite-filter { grid-column: 1 / -1; } .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; } .card { padding: 10px; } .favorite-button { top: 16px; right: 16px; width: 34px; height: 34px; } .product-icon { height: 118px; font-size: 50px; } .card h2 { font-size: 16px; } .description { min-height: 54px; font-size: 12px; } .card-bottom { align-items: flex-start; flex-direction: column; } .add-button { width: 100%; } }
     @media (max-width: 360px) { .products { grid-template-columns: 1fr; } .catalog-tools { grid-template-columns: 1fr; } .catalog-tools input { grid-column: auto; } }
   </style>
 </head>
 <body>
   <header>
     <div class="brand">Ruang Belanja</div>
-    <button class="cart-trigger" id="open-cart" type="button" aria-haspopup="dialog" aria-label="Buka keranjang">
-      Keranjang: <span id="cart-count">0</span>
-    </button>
+    <div class="header-actions">
+      <button class="history-trigger" id="open-orders" type="button" aria-haspopup="dialog">Pesanan: <span id="order-count">0</span></button>
+      <button class="cart-trigger" id="open-cart" type="button" aria-haspopup="dialog" aria-label="Buka keranjang">
+        Keranjang: <span id="cart-count">0</span>
+      </button>
+    </div>
   </header>
 
   <main>
@@ -119,7 +131,21 @@
         <p class="checkout-note">Checkout ini merupakan simulasi. Pembayaran dan pengiriman belum terhubung.</p>
         <button class="primary-button" type="submit">Buat pesanan demo</button>
       </form>
-      <p id="checkout-result" class="checkout-result" role="status" hidden></p>
+      <div id="checkout-result" class="checkout-result" role="status" hidden>
+        <p id="checkout-result-text"></p>
+        <div id="checkout-result-items" class="result-items"></div>
+        <div class="result-actions">
+          <button class="primary-button" id="view-orders-after-checkout" type="button">Lihat riwayat</button>
+          <button class="plain-button" type="button" data-close="checkout-dialog">Selesai</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="orders-dialog" aria-labelledby="orders-title">
+    <div class="dialog-content">
+      <div class="dialog-head"><h2 id="orders-title">Riwayat pesanan</h2><button class="plain-button" type="button" data-close="orders-dialog" aria-label="Tutup riwayat pesanan">Tutup</button></div>
+      <div id="order-list" class="order-list"></div>
     </div>
   </dialog>
 
@@ -141,10 +167,13 @@
     const favoritesOnly = document.getElementById('favorites-only');
     const cartDialog = document.getElementById('cart-dialog');
     const checkoutDialog = document.getElementById('checkout-dialog');
+    const ordersDialog = document.getElementById('orders-dialog');
     const storageKey = 'ruang-belanja-cart-v2';
     const favoritesStorageKey = 'ruang-belanja-favorites-v1';
+    const ordersStorageKey = 'ruang-belanja-orders-v1';
     let cart = {};
     let favorites = new Set();
+    let orders = [];
 
     try {
       const savedCart = JSON.parse(localStorage.getItem(storageKey) || '{}');
@@ -164,6 +193,22 @@
       }
     } catch {
       favorites = new Set();
+    }
+
+    try {
+      const savedOrders = JSON.parse(localStorage.getItem(ordersStorageKey) || '[]');
+      if (Array.isArray(savedOrders)) {
+        orders = savedOrders.map((order) => {
+          if (!order || typeof order.id !== 'string' || !Number.isFinite(Date.parse(order.createdAt)) || !Array.isArray(order.items)) return null;
+          const items = order.items.filter((item) =>
+            item && products.some((product) => product.id === item.id) && Number.isInteger(item.quantity) && item.quantity > 0
+          ).map((item) => ({ id: item.id, quantity: item.quantity }));
+          if (!items.length) return null;
+          return { id: order.id, createdAt: order.createdAt, items };
+        }).filter(Boolean);
+      }
+    } catch {
+      orders = [];
     }
 
     [...new Set(products.map((product) => product.category))].sort().forEach((category) => {
@@ -249,6 +294,51 @@
       saveCart();
     }
 
+    function renderOrders() {
+      const list = document.getElementById('order-list');
+      document.getElementById('order-count').textContent = orders.length;
+      if (!orders.length) {
+        list.innerHTML = '<p class="empty-results">Belum ada pesanan. Pesanan demo yang dibuat akan muncul di sini.</p>';
+        return;
+      }
+
+      list.replaceChildren(...orders.map((order) => {
+        const items = order.items.map((item) => ({
+          ...products.find((product) => product.id === item.id),
+          quantity: item.quantity
+        }));
+        const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const article = document.createElement('article');
+        article.className = 'order-record';
+
+        const heading = document.createElement('div');
+        heading.className = 'order-record-head';
+        const orderNumber = document.createElement('span');
+        orderNumber.textContent = order.id;
+        const status = document.createElement('span');
+        status.textContent = 'Demo';
+        heading.append(orderNumber, status);
+
+        const date = document.createElement('p');
+        date.textContent = new Date(order.createdAt).toLocaleString('id-ID');
+        const itemList = document.createElement('ul');
+        items.forEach((item) => {
+          const row = document.createElement('li');
+          row.textContent = `${item.name} × ${item.quantity} — ${formatRupiah(item.price * item.quantity)}`;
+          itemList.appendChild(row);
+        });
+        const totalRow = document.createElement('div');
+        totalRow.className = 'order-record-total';
+        const totalLabel = document.createElement('span');
+        totalLabel.textContent = 'Total';
+        const totalPrice = document.createElement('span');
+        totalPrice.textContent = formatRupiah(total);
+        totalRow.append(totalLabel, totalPrice);
+        article.append(heading, date, itemList, totalRow);
+        return article;
+      }));
+    }
+
     document.getElementById('search-input').addEventListener('input', renderProducts);
     categoryFilter.addEventListener('change', renderProducts);
     document.getElementById('sort-select').addEventListener('change', renderProducts);
@@ -283,6 +373,10 @@
       }
     });
     document.getElementById('open-cart').addEventListener('click', () => cartDialog.showModal());
+    document.getElementById('open-orders').addEventListener('click', () => {
+      renderOrders();
+      ordersDialog.showModal();
+    });
     document.getElementById('clear-cart').addEventListener('click', () => {
       cart = {};
       renderCart();
@@ -299,17 +393,38 @@
     document.getElementById('checkout-form').addEventListener('submit', (event) => {
       event.preventDefault();
       if (!event.currentTarget.reportValidity()) return;
-      const orderId = `RB-${Date.now().toString().slice(-6)}`;
+      const orderItems = Object.entries(cart).map(([id, quantity]) => ({ id, quantity }));
+      if (!orderItems.length) return;
+      const orderId = `RB-${Date.now().toString(36).toUpperCase()}`;
+      const order = { id: orderId, createdAt: new Date().toISOString(), items: orderItems };
+      orders.unshift(order);
+      localStorage.setItem(ordersStorageKey, JSON.stringify(orders));
+      const orderTotal = orderItems.reduce((sum, item) => {
+        const product = products.find((productItem) => productItem.id === item.id);
+        return sum + (product ? product.price * item.quantity : 0);
+      }, 0);
       cart = {};
       renderCart();
       event.currentTarget.hidden = true;
-      const result = document.getElementById('checkout-result');
-      result.textContent = `Pesanan demo ${orderId} berhasil dibuat. Ini simulasi; pembayaran dan pengiriman belum diproses.`;
-      result.hidden = false;
+      document.getElementById('checkout-result-text').textContent = `Pesanan demo ${orderId} berhasil dibuat. Total ${formatRupiah(orderTotal)}. Pembayaran dan pengiriman belum diproses.`;
+      document.getElementById('checkout-result-items').replaceChildren(...orderItems.map((item) => {
+        const product = products.find((productItem) => productItem.id === item.id);
+        const row = document.createElement('p');
+        row.textContent = `${product.name} × ${item.quantity} — ${formatRupiah(product.price * item.quantity)}`;
+        return row;
+      }));
+      document.getElementById('checkout-result').hidden = false;
+      renderOrders();
+    });
+    document.getElementById('view-orders-after-checkout').addEventListener('click', () => {
+      checkoutDialog.close();
+      renderOrders();
+      ordersDialog.showModal();
     });
 
     renderProducts();
     renderCart();
+    renderOrders();
   </script>
 </body>
 </html>

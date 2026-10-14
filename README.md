@@ -8,8 +8,9 @@ Website toko sederhana yang dibuat dengan HTML, CSS, dan JavaScript agar bisa di
 - Simpan produk favorit dan tampilkan favorit saja; pilihan tersimpan di browser.
 - Kelola jumlah barang di keranjang; keranjang juga tersimpan di browser.
 - Simulasi checkout untuk melihat ringkasan pesanan demo.
+- Lihat konfirmasi dan riwayat pesanan demo yang tersimpan di browser.
 
-Checkout masih berupa simulasi. Pembayaran dan pengiriman belum terhubung.
+Checkout masih berupa simulasi. Riwayat tersimpan hanya di browser yang digunakan; pembayaran dan pengiriman belum terhubung.
 
 ## Cara menjalankan lokal
 
